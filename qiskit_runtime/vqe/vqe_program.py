@@ -287,6 +287,7 @@ class VQEProgram(MinimumEigensolver):
         vqe_result.cost_function_evals = result.get('cost_function_evals', None)
         vqe_result.eigenstate = result.get('eigenstate', None)
         vqe_result.eigenvalue = result.get('eigenvalue', None)
+        vqe_result.aux_operator_eigenvalues = result.get('aux_operator_eigenvalues', None)
         vqe_result.optimal_parameters = result.get('optimal_parameters', None)
         vqe_result.optimal_point = result.get('optimal_point', None)
         vqe_result.optimizer_evals = result.get('optimizer_evals', None)
