@@ -274,7 +274,6 @@ class VQEProgram(MinimumEigensolver):
                                         inputs=inputs,
                                         options=options,
                                         callback=self._wrap_vqe_callback())
-        print('Job ID', job.job_id())
         # print job ID if something goes wrong
         try:
             result = job.result()
@@ -290,6 +289,7 @@ class VQEProgram(MinimumEigensolver):
         vqe_result.aux_operator_eigenvalues = result.get('aux_operator_eigenvalues', None)
         vqe_result.optimal_parameters = result.get('optimal_parameters', None)
         vqe_result.optimal_point = result.get('optimal_point', None)
+        vqe_result.optimal_value = result.get('optimal_value', None)
         vqe_result.optimizer_evals = result.get('optimizer_evals', None)
         vqe_result.optimizer_time = result.get('optimizer_time', None)
         vqe_result.optimizer_history = result.get('optimizer_history', None)
@@ -352,7 +352,8 @@ def _validate_optimizer_settings(settings):
     ]
 
     if name == 'QN-SPSA':
-        allowed_settings.remove(['trust_region', 'second_order'])
+        allowed_settings.remove('trust_region')
+        allowed_settings.remove('second_order')
 
     unsupported_args = set(settings.keys()) - set(allowed_settings)
 
