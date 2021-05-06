@@ -49,3 +49,12 @@ jobs:
           python -m pip install -e .
       - name: docs
         run: tox -e docs
+      - name: Compress Artifacts
+        run: |
+          mkdir artifacts
+          tar -zcvf html_docs.tar.gz docs/_build/html
+          mv html_docs.tar.gz artifacts/.
+      - uses: actions/upload-artifact@v2
+        with:
+          name: html_docs
+          path: artifacts
