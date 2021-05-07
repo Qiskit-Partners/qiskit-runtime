@@ -41,6 +41,7 @@ For additional information and usage examples see the :ref:`tutorials` page.
 
     self
     Getting starting <getting_started>
+    Current runtime limitations <limitations>
     REST API <https://runtime-us-east.quantum-computing.ibm.com/openapi/>
 
 
