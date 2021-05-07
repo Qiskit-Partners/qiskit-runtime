@@ -10,8 +10,9 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Quantum Kernel Alignment feature map."""
+"""The FeatureMap class."""
 
+import numpy as np
 import json
 
 import numpy as np
