@@ -15,9 +15,14 @@ Runtime limitations
    Currently only the *ibmq_montreal* and *ibmq_qasm_simulator* are accessible
    via the Qiskit runtime architecture.
 
+- **Uploading custom quantum programs not supported**
+   
+   At present, uploading custom programs to the Qiskit runtime is not supported.
+   This will be relaxed in upcoming releases.
+
 - **Five circuit limit per circuit runner job**
 
-   The current Qiskit runtime was designed for executing program scripts   
+   The current Qiskit runtime was designed for executing program scripts,   
    and is not tailored to large batches of quantum circuits.  As such, there
    is a size limitation that translates into roughly a five circuit maximum
    per job.
