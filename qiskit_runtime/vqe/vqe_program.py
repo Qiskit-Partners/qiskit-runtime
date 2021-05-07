@@ -64,7 +64,7 @@ class VQEProgram(MinimumEigensolver):
             optimizer = {'name': 'SPSA'}
 
         # define program name
-        self._program_name = 'vqe'
+        self._program_id = 'vqe'
 
         # store settings
         self._provider = None
@@ -100,9 +100,9 @@ class VQEProgram(MinimumEigensolver):
         self._provider = provider
 
     @property
-    def program_name(self) -> str:
-        """Return the program name."""
-        return self._program_name
+    def program_id(self) -> str:
+        """Return the program ID."""
+        return self._program_id
 
     @property
     def ansatz(self) -> QuantumCircuit:
@@ -195,10 +195,9 @@ class VQEProgram(MinimumEigensolver):
         self._callback = callback
 
     def _wrap_vqe_callback(self) -> Optional[Callable]:
-        """ Wraps and returns the given callback to match the signature of the runtime callback. """
+        """Wraps and returns the given callback to match the signature of the runtime callback."""
 
         def wrapped_callback(*args):
-            # TODO: need to be completed
             _, data = args  # first element is the job id
             iteration_count = data[0]
             params = data[1]
@@ -238,27 +237,18 @@ class VQEProgram(MinimumEigensolver):
         if self.provider is None:
             raise ValueError('The provider has not been set.')
 
-        if not isinstance(operator, PauliSumOp):
-            try:
-                primitive = SparsePauliOp(operator.primitive)
-                operator = PauliSumOp(primitive, operator.coeff)
-            except Exception as exc:
-                raise ValueError(f'Invalid type of the operator {type(operator)} '
-                                 'must be PauliSumOp, or castable to one.') from exc
-
-        if self.initial_point is None:
-            initial_point = 'random'
-        else:
-            initial_point = self.initial_point
+        # try to convert the operators to a PauliSumOp, if it isn't already one
+        operator = _convert_to_paulisumop(operator)
+        if aux_operators is not None:
+            aux_operators = [_convert_to_paulisumop(aux_op) for aux_op in aux_operators]
 
         # combine the settings with the given operator to runtime inputs
-        # TODO: change 'random' to None in runtime inputs for initial state
         inputs = {
             'operator': operator,
             'aux_operators': aux_operators,
             'ansatz': self.ansatz,
             'optimizer': self.optimizer,
-            'initial_point': initial_point,
+            'initial_point': self.initial_point,
             'shots': self.shots,
             'readout_error_mitigation': self.readout_error_mitigation,
             'store_intermediate': self.store_intermediate,
@@ -270,7 +260,7 @@ class VQEProgram(MinimumEigensolver):
         }
 
         # send job to runtime and return result
-        job = self.provider.runtime.run(program_id=self.program_name,
+        job = self.provider.runtime.run(program_id=self.program_id,
                                         inputs=inputs,
                                         options=options,
                                         callback=self._wrap_vqe_callback())
@@ -360,3 +350,16 @@ def _validate_optimizer_settings(settings):
     if len(unsupported_args) > 0:
         raise ValueError(f'The following settings are unsupported for the {name} optimizer: '
                          f'{unsupported_args}')
+
+
+def _convert_to_paulisumop(operator):
+    """Attempt to convert the operator to a PauliSumOp."""
+    if isinstance(operator, PauliSumOp):
+        return operator
+
+    try:
+        primitive = SparsePauliOp(operator.primitive)
+        return PauliSumOp(primitive, operator.coeff)
+    except Exception as exc:
+        raise ValueError(f'Invalid type of the operator {type(operator)} '
+                         'must be PauliSumOp, or castable to one.') from exc
