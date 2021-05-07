@@ -28,7 +28,7 @@ but check back, as we’ll be releasing it publicly soon!
 We encourage installing via the pip tool (a python package manager):
 
 ```bash
-pip install qiskit
+pip install qiskit-runtime
 ```
 
 PIP will handle all dependencies automatically and you will always install the latest (and well-tested) version.
