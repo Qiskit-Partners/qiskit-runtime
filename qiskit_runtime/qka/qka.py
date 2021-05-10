@@ -49,8 +49,8 @@ class FeatureMap:
 
         if entangler_map is None:
             self._entangler_map = [
-                [i, j] 
-                for i in range(self._feature_dimension) 
+                [i, j]
+                for i in range(self._feature_dimension)
                 for j in range(i + 1, self._feature_dimension)
             ]
         else:
@@ -177,7 +177,7 @@ class KernelMatrix:
 
             my_product_list = list(
                 itertools.combinations(range(len(x1_vec)), 2)
-            ) # all pairwise combos of datapoint indices
+            )  # all pairwise combos of datapoint indices
 
             for index_1, index_2 in my_product_list:
 
@@ -208,7 +208,7 @@ class KernelMatrix:
 
                 mat[index_1][index_2] = (
                     counts.get(measurement_basis, 0) / shots
-                ) # kernel matrix element is the probability of measuring all 0s
+                )  # kernel matrix element is the probability of measuring all 0s
                 mat[index_2][index_1] = mat[index_1][index_2] # kernel matrix is symmetric
 
             return mat
@@ -441,7 +441,8 @@ class QKA:
                 cost_minus=cost_minus,
                 lambdas=lambdas,
                 spsa_params=spsa_params,
-                delta=delta,count=count,
+                delta=delta,
+                count=count,
             )
 
             lambdas = lambda_best
