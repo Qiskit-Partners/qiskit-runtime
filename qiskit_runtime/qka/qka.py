@@ -209,7 +209,7 @@ class KernelMatrix:
                 mat[index_1][index_2] = (
                     counts.get(measurement_basis, 0) / shots
                 )  # kernel matrix element is the probability of measuring all 0s
-                mat[index_2][index_1] = mat[index_1][index_2] # kernel matrix is symmetric
+                mat[index_2][index_1] = mat[index_1][index_2]  # kernel matrix is symmetric
 
             return mat
 
