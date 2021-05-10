@@ -354,7 +354,7 @@ class QKA:
             lambdas (numpy.ndarray): kernel parameters at step 'count' in SPSA optimization loop
             spsa_params (numpy.ndarray): SPSA parameters
             count (int): the current step in the SPSA optimization loop
-            
+
         Returns:
             numpy.ndarray: kernel parameters in + direction
             numpy.ndarray: kernel parameters in - direction
