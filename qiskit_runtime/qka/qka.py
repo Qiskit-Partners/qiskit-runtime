@@ -37,6 +37,8 @@ class FeatureMap:
             entangler_map (list[list]): connectivity of qubits with a list of [source, target],
                                         or None for full entanglement. Note that the order in
                                         the list is the order of applying the two-qubit gate.
+        Raises:
+            ValueError: If the value of ``feature_dimension`` is not an even integer.                                        
         """
 
         if isinstance(feature_dimension, int):
@@ -72,12 +74,15 @@ class FeatureMap:
 
         Returns:
             QuantumCircuit: a quantum circuit transforming data x
+            
+        Raises:
+            ValueError: If the input parameters or vector are invalid            
         """
 
         if parameters is not None:
             if isinstance(parameters, (int, float)):
                 raise ValueError("Parameters must be a list.")
-            elif len(parameters) == 1:
+            if len(parameters) == 1:
                 parameters = parameters * np.ones(self._num_qubits)
             else:
                 if len(parameters) != self._num_parameters:
@@ -171,7 +176,7 @@ class KernelMatrix:
             parameters (numpy.ndarray): optional parameters in feature map
 
         Returns:
-           mat (numpy.ndarray): the kernel matrix
+           numpy.ndarray: the kernel matrix
         """
 
         is_identical = False
@@ -295,7 +300,7 @@ class QKA:
         for fixed coefficents a, c, alpha, gamma, A.
 
         Returns:
-            spsa_params (numpy.ndarray): [a, c, alpha, gamma, A]
+            numpy.ndarray: spsa parameters
         """
         spsa_params = np.zeros((5))
         spsa_params[0] = 0.05  # a
@@ -317,7 +322,7 @@ class QKA:
             show_progress (bool): print progress of solver
 
         Returns;
-            ret (dict): results from the solver
+            dict: results from the solver
         """
 
         if y.ndim == 1:
@@ -416,7 +421,7 @@ class QKA:
             C (float): penalty parameter for the soft-margin support vector machine
 
         Returns:
-            result (dict): the results of kernel alignment
+            dict: the results of kernel alignment
         """
 
         if initial_kernel_parameters is not None:
