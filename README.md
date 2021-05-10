@@ -25,16 +25,18 @@ but check back, as we’ll be releasing it publicly soon!
 
 ## Installation
 
-You need to have the last version of [Qiskit](https://qiskit.org) and of [Qiskit IBM Quantum providers](https://github.com/Qiskit/qiskit-ibmq-provider) installed, in that case you can download this repository and use Jupyter Notebook/Lab to explore the tutorial and learn how Qiskit Runtime works.
+You need to install the required packages needed for the tutorials, which is documented in `requirements.txt`.
+After that, you can download this repository and use Jupyter Notebook/Lab to explore the 
+tutorials and learn how Qiskit Runtime works.
 
-'''bash
-pip install qiskit -U
-
+```bash
 git clone https://github.com/Qiskit-Partners/qiskit-runtime.git
+cd qiskit-runtime
+pip install -r requirements.txt
 
 cd qiskit-runtime/tutorials
 jupyter notebook .
-''' 
+```
 
 ## Executing a runtime program
 
