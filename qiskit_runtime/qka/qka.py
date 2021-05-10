@@ -12,16 +12,14 @@
 
 """The Quantum Kernel Alignment algorithm."""
 
+import itertools
+import json
+import warnings
 import numpy as np
 from numpy.random import RandomState
-import itertools
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.compiler import transpile
-from cvxopt import matrix, solvers
-
-import json
-
-import warnings
+from cvxopt import matrix, solvers  # pylint: disable=import-error
 
 warnings.simplefilter("ignore")
 
@@ -32,9 +30,11 @@ class FeatureMap:
     def __init__(self, feature_dimension, entangler_map=None):
         """
         Args:
-            feature_dimension (int): number of features (twice the number of qubits for this encoding)
-            entangler_map (list[list]): connectivity of qubits with a list of [source, target], or None for full entanglement.
-                                        Note that the order in the list is the order of applying the two-qubit gate.
+            feature_dimension (int): number of features 
+                                     (twice the number of qubits for this encoding)
+            entangler_map (list[list]): connectivity of qubits with a list of [source, target],
+                                        or None for full entanglement. Note that the order in
+                                        the list is the order of applying the two-qubit gate.
         """
 
         if isinstance(feature_dimension, int):
@@ -66,13 +66,14 @@ class FeatureMap:
             parameters (numpy.ndarray): optional parameters in feature map
             q (QauntumRegister): the QuantumRegister object for the circuit
             inverse (bool): whether or not to invert the circuit
+            name (str): name of circuit
 
         Returns:
             QuantumCircuit: a quantum circuit transforming data x
         """
 
         if parameters is not None:
-            if isinstance(parameters, int) or isinstance(parameters, float):
+            if isinstance(parameters, (int, float)):
                 raise ValueError("Parameters must be a list.")
             elif len(parameters) == 1:
                 parameters = parameters * np.ones(self._num_qubits)
@@ -127,7 +128,7 @@ class FeatureMap:
             data (str): JSON string representing an object.
 
         Returns:
-            An instance of this class.
+            cls: An instance of this class.
         """
         return cls(**json.loads(data))
 
@@ -140,7 +141,9 @@ class KernelMatrix:
         Args:
             feature_map: the feature map object
             backend (Backend): the backend instance
-            initial_layout (list or dict): initial position of virtual qubits on the physical qubits of the quantum device
+            initial_layout (list or dict): initial position of virtual 
+                                           qubits on the physical qubits 
+                                           of the quantum device
         """
 
         self._feature_map = feature_map
@@ -157,8 +160,12 @@ class KernelMatrix:
         states Phi^dag(y)Phi(x)|0> for input vectors x and y.
 
         Args:
-            x1_vec (numpy.ndarray): NxD array of training data or test data, where N is the number of samples and D is the feature dimension
-            x2_vec (numpy.ndarray): MxD array of training data or support vectors, where M is the number of samples and D is the feature dimension
+            x1_vec (numpy.ndarray): NxD array of training data or test data, 
+                                    where N is the number of samples 
+                                    and D is the feature dimension
+            x2_vec (numpy.ndarray): MxD array of training data or support 
+                                    vectors, where M is the number of samples
+                                    and D is the feature dimension
             parameters (numpy.ndarray): optional parameters in feature map
 
         Returns:
@@ -258,7 +265,8 @@ class QKA:
         Args:
             feature_map (partial obj): the quantum feature map object
             backend (Backend): the backend instance
-            initial_layout (list or dict): initial position of virtual qubits on the physical qubits of the quantum device
+            initial_layout (list or dict): initial position of virtual qubits on
+                                           the physical qubits of the quantum device
             user_messenger (UserMessenger): used to publish interim results.
         """
 
@@ -274,11 +282,8 @@ class QKA:
             feature_map=self.feature_map, backend=self.backend, initial_layout=self.initial_layout
         )
 
-    def SPSA_parameters(self):
+    def spsa_parameters(self):
         """Return array of precomputed SPSA parameters.
-
-        Returns:
-            SPSA_params (numpy.ndarray): [a, c, alpha, gamma, A]
 
         The i-th optimization step, i>=0, the parameters evolve as
 
@@ -286,16 +291,18 @@ class QKA:
             c_i = c / (i + 1) ** gamma,
 
         for fixed coefficents a, c, alpha, gamma, A.
+
+        Returns:
+            spsa_params (numpy.ndarray): [a, c, alpha, gamma, A]
         """
 
-        SPSA_params = np.zeros((5))
-        SPSA_params[0] = 0.05  # a
-        SPSA_params[1] = 0.1  # c
-        SPSA_params[2] = 0.602  # alpha
-        SPSA_params[3] = 0.101  # gamma
-        SPSA_params[4] = 0  # A
+        spsa_params[0] = 0.05  # a
+        spsa_params[1] = 0.1  # c
+        spsa_params[2] = 0.602  # alpha
+        spsa_params[3] = 0.101  # gamma
+        spsa_params[4] = 0  # A
 
-        return SPSA_params
+        return spsa_params
 
     def cvxopt_solver(self, K, y, C, max_iters=10000, show_progress=False):
         """Convex optimization of SVM objective using cvxopt.
@@ -341,6 +348,7 @@ class QKA:
             lambdas (numpy.ndarray): kernel parameters at step 'count' in SPSA optimization loop
             spsa_params (numpy.ndarray): SPSA parameters
             count (int): the current step in the SPSA optimization loop
+            
         Returns:
             lambda_plus (numpy.ndarray): kernel parameters in + direction
             lambda_minus (numpy.ndarray): kernel parameters in - direction
@@ -372,8 +380,10 @@ class QKA:
             count(int): the current step in the SPSA optimization loop
 
         Returns:
-            cost_final (float): estimate of updated SVM objective function F using average of F(alpha_+, lambda_+) and F(alpha_-, lambda_-)
-            lambdas_new (numpy.ndarray): updated values of the kernel parameters after one SPSA optimization step
+            cost_final (float): estimate of updated SVM objective function F using average 
+                                of F(alpha_+, lambda_+) and F(alpha_-, lambda_-)
+            lambdas_new (numpy.ndarray): updated values of the kernel parameters
+                                         after one SPSA optimization step
         """
 
         a_spsa = float(spsa_params[0]) / np.power(count + 1 + spsa_params[4], spsa_params[2])
@@ -397,7 +407,8 @@ class QKA:
         min_lambda max_alpha 1^T * alpha - (1/2) * alpha^T * Y * K_lambda * Y * alpha
 
         Args:
-            data (numpy.ndarray): NxD array of training data, where N is the number of samples and D is the feature dimension
+            data (numpy.ndarray): NxD array of training data, where N is the
+                                  number of samples and D is the feature dimension
             labels (numpy.ndarray): Nx1 array of +/-1 labels of the N training samples
             initial_kernel_parameters (numpy.ndarray): Initial parameters of the quantum kernel
             maxiters (int): number of SPSA optimization steps
@@ -412,7 +423,7 @@ class QKA:
         else:
             lambdas = np.random.uniform(-1.0, 1.0, size=(self.num_parameters))
 
-        spsa_params = self.SPSA_parameters()
+        spsa_params = self.spsa_parameters()
 
         lambda_save = []
         cost_final_save = []
@@ -454,7 +465,8 @@ class QKA:
             lambda_save.append(lambdas)
             cost_final_save.append(cost_final)
 
-        # Evaluate aligned kernel matrix with optimized set of parameters averaged over last 10% of SPSA steps:
+        # Evaluate aligned kernel matrix with optimized set of 
+        # parameters averaged over last 10% of SPSA steps:
         num_last_lambdas = int(len(lambda_save) * 0.10)
         if num_last_lambdas > 0:
             last_lambdas = np.array(lambda_save)[-num_last_lambdas:, :]
