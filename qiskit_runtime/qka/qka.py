@@ -30,8 +30,8 @@ class FeatureMap:
     def __init__(self, feature_dimension, entangler_map=None):
         """
         Args:
-            feature_dimension (int): number of features 
-                                     (twice the number of qubits for this encoding)
+            feature_dimension (int): number of features, twice the number
+                                     of qubits for this encoding
             entangler_map (list[list]): connectivity of qubits with a list of [source, target],
                                         or None for full entanglement. Note that the order in
                                         the list is the order of applying the two-qubit gate.
@@ -141,8 +141,8 @@ class KernelMatrix:
         Args:
             feature_map: the feature map object
             backend (Backend): the backend instance
-            initial_layout (list or dict): initial position of virtual 
-                                           qubits on the physical qubits 
+            initial_layout (list or dict): initial position of virtual
+                                           qubits on the physical qubits
                                            of the quantum device
         """
 
@@ -160,10 +160,10 @@ class KernelMatrix:
         states Phi^dag(y)Phi(x)|0> for input vectors x and y.
 
         Args:
-            x1_vec (numpy.ndarray): NxD array of training data or test data, 
-                                    where N is the number of samples 
+            x1_vec (numpy.ndarray): NxD array of training data or test data,
+                                    where N is the number of samples
                                     and D is the feature dimension
-            x2_vec (numpy.ndarray): MxD array of training data or support 
+            x2_vec (numpy.ndarray): MxD array of training data or support
                                     vectors, where M is the number of samples
                                     and D is the feature dimension
             parameters (numpy.ndarray): optional parameters in feature map
@@ -348,7 +348,6 @@ class QKA:
             lambdas (numpy.ndarray): kernel parameters at step 'count' in SPSA optimization loop
             spsa_params (numpy.ndarray): SPSA parameters
             count (int): the current step in the SPSA optimization loop
-            
         Returns:
             lambda_plus (numpy.ndarray): kernel parameters in + direction
             lambda_minus (numpy.ndarray): kernel parameters in - direction
@@ -380,7 +379,7 @@ class QKA:
             count(int): the current step in the SPSA optimization loop
 
         Returns:
-            cost_final (float): estimate of updated SVM objective function F using average 
+            cost_final (float): estimate of updated SVM objective function F using average
                                 of F(alpha_+, lambda_+) and F(alpha_-, lambda_-)
             lambdas_new (numpy.ndarray): updated values of the kernel parameters
                                          after one SPSA optimization step
@@ -465,7 +464,7 @@ class QKA:
             lambda_save.append(lambdas)
             cost_final_save.append(cost_final)
 
-        # Evaluate aligned kernel matrix with optimized set of 
+        # Evaluate aligned kernel matrix with optimized set of
         # parameters averaged over last 10% of SPSA steps:
         num_last_lambdas = int(len(lambda_save) * 0.10)
         if num_last_lambdas > 0:
