@@ -25,7 +25,7 @@ but check back, as we’ll be releasing it publicly soon!
 
 ## Installation
 
-You need to install the required packages needed for the tutorials, which is documented in `requirements.txt`.
+You need to install the required packages needed for the tutorials, which are documented in `requirements.txt`.
 After that, you can download this repository and use Jupyter Notebook/Lab to explore the 
 tutorials and learn how Qiskit Runtime works.
 
