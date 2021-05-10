@@ -320,7 +320,7 @@ class QKA:
             max_iters (int): maximum iterations for the solver
             show_progress (bool): print progress of solver
 
-        Returns;
+        Returns:
             dict: results from the solver
         """
 
@@ -354,10 +354,11 @@ class QKA:
             lambdas (numpy.ndarray): kernel parameters at step 'count' in SPSA optimization loop
             spsa_params (numpy.ndarray): SPSA parameters
             count (int): the current step in the SPSA optimization loop
+            
         Returns:
-            lambda_plus (numpy.ndarray): kernel parameters in + direction
-            lambda_minus (numpy.ndarray): kernel parameters in - direction
-            delta (numpy.ndarray): random vector with elements {-1,1}
+            numpy.ndarray: kernel parameters in + direction
+            numpy.ndarray: kernel parameters in - direction
+            numpy.ndarray: random vector with elements {-1,1}
         """
 
         prng = RandomState(count)
@@ -385,10 +386,10 @@ class QKA:
             count(int): the current step in the SPSA optimization loop
 
         Returns:
-            cost_final (float): estimate of updated SVM objective function F using average
-                                of F(alpha_+, lambda_+) and F(alpha_-, lambda_-)
-            lambdas_new (numpy.ndarray): updated values of the kernel parameters
-                                         after one SPSA optimization step
+            float: estimate of updated SVM objective function F using average
+                   of F(alpha_+, lambda_+) and F(alpha_-, lambda_-)
+            numpy.ndarray: updated values of the kernel parameters
+                           after one SPSA optimization step
         """
 
         a_spsa = float(spsa_params[0]) / np.power(count + 1 + spsa_params[4], spsa_params[2])
