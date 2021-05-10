@@ -1,8 +1,6 @@
 # Qiskit Runtime
 
 [![License](https://img.shields.io/github/license/Qiskit/qiskit-terra.svg?style=popout-square)](https://opensource.org/licenses/Apache-2.0)
-[![](https://img.shields.io/github/release/Qiskit-Partners/qiskit-runtime.svg?style=popout-square)](https://github.com/Qiskit-Partners/qiskit-runtime/releases)
-[![](https://img.shields.io/pypi/dm/qiskit-runtime.svg?style=popout-square)](https://pypi.org/project/qiskit-runtime/)
 
 **Qiskit Runtime** is a new architecture offered by IBM Quantum that significantly reduces waiting time during 
 computational iterations. You can execute your experiments near the quantum hardware, without 
