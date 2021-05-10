@@ -12,6 +12,8 @@
 
 """The Quantum Kernel Alignment algorithm."""
 
+# pylint: disable=invalid-name
+
 import itertools
 import json
 import warnings
@@ -295,7 +297,6 @@ class QKA:
         Returns:
             spsa_params (numpy.ndarray): [a, c, alpha, gamma, A]
         """
-        
         spsa_params = np.zeros((5))
         spsa_params[0] = 0.05  # a
         spsa_params[1] = 0.1  # c
