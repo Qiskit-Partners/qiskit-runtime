@@ -73,7 +73,7 @@ class FeatureMap:
             name (str): name of circuit
 
         Returns:
-            QuantumCircuit: a quantum circuit transforming data x  
+            QuantumCircuit: a quantum circuit transforming data x
         Raises:
             ValueError: If the input parameters or vector are invalid
         """
