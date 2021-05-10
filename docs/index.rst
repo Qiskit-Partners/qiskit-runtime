@@ -47,7 +47,7 @@ For additional information and usage examples see the :ref:`tutorials` page.
 
 .. toctree::
     :maxdepth: 1
-    :caption: Programs
+    :caption: Program overviews
     :hidden:
   
     Circuit runner <circuit_runner/circuit_runner_overview.ipynb>
