@@ -47,8 +47,17 @@ For additional information and usage examples see the :ref:`tutorials` page.
 
 .. toctree::
     :maxdepth: 1
-    :caption: Program examples
+    :caption: Programs
     :hidden:
   
-    Circuit runner <example_scripts/circuit_runner>
+    Circuit runner <circuit_runner/circuit_runner_overview.ipynb>
+    VQE <example_scripts/vqe>
+
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Example program scripts
+    :hidden:
+  
+    Circuit runner <circuit_runner/example_script>
     VQE <example_scripts/vqe>
