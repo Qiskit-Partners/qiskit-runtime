@@ -295,7 +295,8 @@ class QKA:
         Returns:
             spsa_params (numpy.ndarray): [a, c, alpha, gamma, A]
         """
-
+        
+        spsa_params = np.zeros((5))
         spsa_params[0] = 0.05  # a
         spsa_params[1] = 0.1  # c
         spsa_params[2] = 0.602  # alpha
