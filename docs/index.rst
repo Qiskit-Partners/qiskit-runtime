@@ -51,7 +51,6 @@ For additional information and usage examples see the :ref:`tutorials` page.
     :hidden:
   
     Circuit runner <circuit_runner/circuit_runner_overview.ipynb>
-    VQE <example_scripts/vqe>
 
 
 .. toctree::
