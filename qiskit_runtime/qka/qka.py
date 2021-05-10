@@ -38,7 +38,7 @@ class FeatureMap:
                                         or None for full entanglement. Note that the order in
                                         the list is the order of applying the two-qubit gate.
         Raises:
-            ValueError: If the value of ``feature_dimension`` is not an even integer.                                        
+            ValueError: If the value of ``feature_dimension`` is not an even integer.
         """
 
         if isinstance(feature_dimension, int):
@@ -73,10 +73,9 @@ class FeatureMap:
             name (str): name of circuit
 
         Returns:
-            QuantumCircuit: a quantum circuit transforming data x
-            
+            QuantumCircuit: a quantum circuit transforming data x  
         Raises:
-            ValueError: If the input parameters or vector are invalid            
+            ValueError: If the input parameters or vector are invalid
         """
 
         if parameters is not None:
