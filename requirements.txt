@@ -1,5 +1,6 @@
-qiskit-terra>=0.17
-qiskit-ibmq-provider>=0.13.0
+qiskit-terra>=0.17.3
+qiskit-nature>=0.1.2
+qiskit-ibmq-provider>=0.13.1
 jupyter
 numpy
 matplotlib
