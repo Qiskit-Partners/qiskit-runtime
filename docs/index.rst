@@ -5,6 +5,8 @@ Qiskit Runtime (|version|)
 .. important:: 
 
     The Qiskit Runtime is currently in beta mode, and is in limited release.
+    Those interested in using the Qiskit Runtime can
+    `request access <https://airtable.com/shrm6zyNBns86hB4C>`_.
 
 
 The Qiskit Runtime is a new execution model / architecture that markedly reduces
