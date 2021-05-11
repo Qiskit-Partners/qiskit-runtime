@@ -1,13 +1,13 @@
 ##########################
-Qiskit runtime (|version|)
+Qiskit Runtime (|version|)
 ##########################
 
 .. important:: 
 
-    The Qiskit runtime is currently in beta mode, and is in limited release.
+    The Qiskit Runtime is currently in beta mode, and is in limited release.
 
 
-The Qiskit runtime is a new execution model / architecture that markedly reduces
+The Qiskit Runtime is a new execution model / architecture that markedly reduces
 IO overhead when submitting applications and algorithms to quantum processors that
 require many iterations of circuit executions and classical processing.  Programs of this
 category are common, and span a wide variety of application spaces including chemistry,
@@ -16,7 +16,7 @@ machine learning, and optimization.
 .. figure:: images/runtime_arch.png
     :align: center
 
-In general, most users of the Qiskit runtime execute programs that are predefined
+In general, most users of the Qiskit Runtime execute programs that are predefined
 and specified using a program name and a small number of input arguments, e.g.:
 
 .. code-block:: python
