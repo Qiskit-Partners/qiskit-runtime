@@ -10,20 +10,17 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""The Quantum Kernel Alignment algorithm."""
+"""Source code for the QKA Qiskit Runtime program."""
 
 # pylint: disable=invalid-name
 
 import itertools
 import json
-import warnings
 import numpy as np
 from numpy.random import RandomState
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.compiler import transpile
 from cvxopt import matrix, solvers  # pylint: disable=import-error
-
-warnings.simplefilter("ignore")
 
 
 class FeatureMap:
