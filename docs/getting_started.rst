@@ -15,6 +15,8 @@ The Qiskit Runtime requires the following packages:
 
 that come as part of ``qiskit>=0.26.0`` or can be installed individually.  For usage examples
 see the :ref:`tutorials`.  Example Runtime programs can also be found in the sidebar navigation.
+Additional information can be found in the
+`IBM Quantum Runtime documentation <https://quantum-computing.ibm.com/lab/docs/iql/runtime/>`_.
 
 Tutorial Requirements
 ======================

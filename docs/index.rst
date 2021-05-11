@@ -35,7 +35,8 @@ and specified using a program name and a small number of input arguments, e.g.:
 It is also possible to define custom programs and upload them to the Cloud infrastructure,
 although access to this functionality is limited at present.
 
-For additional information and usage examples see the :ref:`tutorials` page.
+For additional information and usage examples see the :ref:`tutorials` page and the
+`IBM Quantum Runtime documentation <https://quantum-computing.ibm.com/lab/docs/iql/runtime/>`_.
 
 
 .. toctree::
