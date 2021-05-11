@@ -10,7 +10,7 @@ Qiskit runtime (|version|)
 The Qiskit runtime is a new execution model / architecture that markedly reduces
 IO overhead when submitting applications and algorithms to quantum processors that
 require many iterations of circuit executions and classical processing.  Programs of this
-category are common, and span a wide variety of applications spaces including chemistry,
+category are common, and span a wide variety of application spaces including chemistry,
 machine learning, and optimization.  
 
 .. figure:: images/runtime_arch.png
@@ -42,7 +42,6 @@ For additional information and usage examples see the :ref:`tutorials` page.
     self
     Getting starting <getting_started>
     Current runtime limitations <limitations>
-    REST API <https://runtime-us-east.quantum-computing.ibm.com/openapi/>
 
 
 .. toctree::
