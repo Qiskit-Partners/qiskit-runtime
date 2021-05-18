@@ -6,10 +6,8 @@ Runtime limitations
 
 - **Currently in private beta**
 
-   Qiskit Runtime is now available on the ``ibmq_qasm_simulator`` for all
-   premium users to try out. Some members of the IBM Quantum Network also
-   have system access in private beta mode. A general release will follow
-   after this testing is completed.
+   The Qiskit Runtime is currently in private beta testing with premium users.
+   A general release will follow after this testing is completed.
 
 - **Limited quantum systems available for Qiskit Runtime**
    
