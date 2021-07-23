@@ -1,0 +1,5 @@
+{
+  "name": "vqe",
+  "description": "Variational Quantum Eigensolver (VQE) to find the minimal eigenvalue of a Hamiltonian.",
+  "max_execution_time": 14400
+}

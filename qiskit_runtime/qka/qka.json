@@ -1,0 +1,5 @@
+{
+  "name": "quantum-kernel-alignment",
+  "description": "Quantum kernel alignment algorithm that learns, on a given dataset, a quantum kernel maximizing the SVM classification margin.",
+  "max_execution_time": 28800
+}

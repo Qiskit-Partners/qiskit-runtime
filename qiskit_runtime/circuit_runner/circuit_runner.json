@@ -1,0 +1,5 @@
+{
+  "name": "circuit-runner",
+  "description": "A runtime program that takes one or more circuits, compiles them, executes them, and optionally applies measurement error mitigation.",
+  "max_execution_time": 14400
+}

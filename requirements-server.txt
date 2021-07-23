@@ -1,3 +1,4 @@
+cvxopt
 qiskit-aer
 fastapi
 rq
