@@ -4,13 +4,17 @@ https://runtime-us-east.quantum-computing.ibm.com/openapi
 """
 
 import json
+from qiskit_runtime.test_server.ioutils import get_job_log_path, get_job_result_path
 from typing import List, Optional
+
+
 from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 from redis import Redis
 from rq import Queue
 from rq.job import Job
 from rq.registry import FinishedJobRegistry, StartedJobRegistry, FailedJobRegistry
+from qiskit.providers.ibmq.runtime import RuntimeDecoder
 
 
 from .launcher import launch
@@ -86,7 +90,7 @@ class ProgramsResponse(BaseModel):
 def run_job(program_call: ProgramParams):
     program_module_path = _PROGRAM_MAP[program_call.programId]
     metadata = load_metadata(program_module_path)
-    kwargs = json.loads(program_call.params[0]) if program_call.params else {}
+    kwargs = json.loads(program_call.params[0], cls=RuntimeDecoder) if program_call.params else {}
     job = Job.create(
         launch,
         args=(program_module_path, _DEFAULT_SIMULATOR, kwargs),
@@ -95,6 +99,8 @@ def run_job(program_call: ProgramParams):
         timeout=metadata.get("max_execution_time", _DEFAULT_PROGRAM_TIMEOUT),
         connection=redis_conn,
     )
+    job.meta["log_path"] = get_job_log_path(job.id)
+    job.meta["result_path"] = get_job_result_path(job.id)
     queue.enqueue_job(job)
     return {"id": job.id}
 
@@ -132,6 +138,16 @@ def get_job(job_id: str):
         raise HTTPException(status_code=404, detail="Job not found")
 
     return to_job_response(job)
+
+
+@runtime.get("/jobs/{job_id}/logs", tags=["jobs"])
+def get_job_logs(job_id: str):
+    job = queue.fetch_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    with open(job.meta["log_path"], "r") as log_file:
+        return log_file.read()
 
 
 @runtime.delete("/jobs/{job_id}", status_code=204, tags=["jobs"])
