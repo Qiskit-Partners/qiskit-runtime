@@ -148,3 +148,6 @@ docs/stubs/*
 test/ipynb/mpl/*.png
 test/ipynb/mpl/*.zip
 test/ipynb/mpl/result_test.json
+
+# Program log directory
+logs

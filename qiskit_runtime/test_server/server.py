@@ -4,17 +4,22 @@ https://runtime-us-east.quantum-computing.ibm.com/openapi
 """
 
 import json
-from qiskit_runtime.test_server.ioutils import get_job_log_path, get_job_result_path
+import asyncio
 from typing import List, Optional
 
 
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, WebSocket
 from pydantic import BaseModel
 from redis import Redis
 from rq import Queue
 from rq.job import Job
 from rq.registry import FinishedJobRegistry, StartedJobRegistry, FailedJobRegistry
 from qiskit.providers.ibmq.runtime import RuntimeDecoder
+from qiskit_runtime.test_server.ioutils import (
+    get_job_log_path,
+    get_job_result_path,
+    get_job_channel_id,
+)
 
 
 from .launcher import launch
@@ -99,8 +104,10 @@ def run_job(program_call: ProgramParams):
         timeout=metadata.get("max_execution_time", _DEFAULT_PROGRAM_TIMEOUT),
         connection=redis_conn,
     )
+    job.meta["program_id"] = program_call.programId
     job.meta["log_path"] = get_job_log_path(job.id)
     job.meta["result_path"] = get_job_result_path(job.id)
+    job.save_meta()
     queue.enqueue_job(job)
     return {"id": job.id}
 
@@ -150,6 +157,19 @@ def get_job_logs(job_id: str):
         return log_file.read()
 
 
+@runtime.get("/jobs/{job_id}/results", tags=["jobs"])
+def get_job_results(job_id: str):
+    job = queue.fetch_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    try:
+        with open(job.meta["result_path"], "r") as result_file:
+            return result_file.read()
+    except OSError:
+        return ""
+
+
 @runtime.delete("/jobs/{job_id}", status_code=204, tags=["jobs"])
 def delete_job(job_id: str):
     job = queue.fetch_job(job_id)
@@ -171,6 +191,23 @@ def cancel_job(job_id: str):
     )
 
 
+@runtime.websocket("/stream/jobs/{job_id}")
+async def stream_job_results(job_id: str, websocket: WebSocket):
+    await websocket.accept()
+    pubsub = redis_conn.pubsub()
+    pubsub.subscribe(get_job_channel_id(job_id))
+
+    while True:
+        message = pubsub.get_message()
+        if message:
+            data = message["data"]
+            print("xxx", type(data))
+            if data:
+                await websocket.send_text(str(data))
+        else:
+            await asyncio.sleep(0.1)
+
+
 @runtime.get("/programs", response_model=ProgramsResponse, tags=["programs"])
 def get_programs():
     all_program_modules = list(_PROGRAM_MAP.values())
@@ -188,7 +225,7 @@ def get_program(program_id: str):
 
 
 def to_job_response(job):
-    program_id, backend, kwargs = job.args
+    _, backend, kwargs = job.args
     return JobResponse(
         id=job.id,
         hub="test-hub",
@@ -197,7 +234,7 @@ def to_job_response(job):
         backend=backend,
         status=_STATUS_MAP[job.get_status()],
         params=[json.dumps(kwargs)],
-        program=program_id,
+        program=job.meta["program_id"],
         created=job.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
     )
 
