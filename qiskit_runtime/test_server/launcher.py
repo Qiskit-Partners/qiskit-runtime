@@ -1,15 +1,28 @@
+# This code is part of qiskit-runtime.
+#
+# (C) Copyright IBM 2021.
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
 """Prepare the environment (the runtime) for launching Qiskit Runtime programs."""
 
 import json
 import importlib
-from qiskit_runtime.test_server.metadata import resolve_program_module_path
+import traceback
 from typing import Any, Type
 from contextlib import ExitStack, redirect_stdout, redirect_stderr
 
+from rq import get_current_job, get_current_connection
+
 from qiskit.providers.ibmq.runtime import UserMessenger
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder
-
-from rq import get_current_job, get_current_connection
+from qiskit_runtime.test_server.metadata import resolve_program_module_path
 
 
 class TestServerUserMessenger(UserMessenger):
@@ -34,7 +47,7 @@ class TestServerUserMessenger(UserMessenger):
         self._context_started = False
 
     def __enter__(self):
-        self._log_file = open(self._log_file, "w")
+        self._log_file = open(self._log_file, "a")
         self._exit_stack.enter_context(self._log_file)
         self._exit_stack.enter_context(redirect_stdout(self._log_file))
         self._exit_stack.enter_context(redirect_stderr(self._log_file))
@@ -70,7 +83,7 @@ class TestServerUserMessenger(UserMessenger):
 
     def _publish_result_on_disk(self, message: str) -> None:
         """Log the message on log and result files."""
-        with open(self._result_path, "w") as result_file:
+        with open(self._result_path, "a") as result_file:
             result_file.write(message)
 
 
@@ -84,4 +97,8 @@ def launch(program_id, simulator_name, kwargs):
         program_module = importlib.import_module(program_module_path)
         backend = Aer.get_backend(simulator_name)
 
-        program_module.main(backend, user_messenger, **kwargs)
+        try:
+            program_module.main(backend, user_messenger, **kwargs)
+        except:
+            traceback.print_exc()
+            raise
