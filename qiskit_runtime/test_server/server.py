@@ -4,11 +4,10 @@ https://runtime-us-east.quantum-computing.ibm.com/openapi
 """
 
 import json
-import asyncio
 from typing import List, Optional
 
 
-from fastapi import FastAPI, Query, HTTPException, WebSocket
+from fastapi import FastAPI, Query, HTTPException, WebSocket, status
 from pydantic import BaseModel
 from redis import Redis
 from rq import Queue
@@ -92,8 +91,9 @@ class ProgramsResponse(BaseModel):
     programs: List[ProgramResponse]
 
 
-@runtime.post("/jobs", tags=["jobs"])
+@runtime.post("/jobs", summary="Run a program", tags=["jobs"])
 def run_job(program_call: ProgramParams):
+    """Run a quantum program"""
     program_module_path = _PROGRAM_MAP[program_call.programId]
     metadata = load_metadata(program_module_path)
     kwargs = json.loads(program_call.params[0], cls=RuntimeDecoder) if program_call.params else {}
@@ -114,7 +114,7 @@ def run_job(program_call: ProgramParams):
     return {"id": job.id}
 
 
-@runtime.get("/jobs", response_model=JobsResponse, tags=["jobs"])
+@runtime.get("/jobs", summary="List jobs", response_model=JobsResponse, tags=["jobs"])
 def get_jobs(
     limit: int = Query(200, description="number of results to return at a time"),
     offset: int = Query(0, description="number of results to offset when retrieving list of jobs"),
@@ -125,13 +125,14 @@ def get_jobs(
         "- Ran too long', and 'Failed' jobs if false",
     ),
 ):
-    status = pending_status() if pending else finished_status()
+    """List my quantum program jobs"""
+    status = _pending_status() if pending else _finished_status()
     all_job_ids = (
         queue.get_job_ids() + started.get_job_ids()
         if pending
         else finished.get_job_ids() + failed.get_job_ids()
     )
-    runtime_jobs = [to_job_response(queue.fetch_job(job_id)) for job_id in all_job_ids]
+    runtime_jobs = [_to_job_response(queue.fetch_job(job_id)) for job_id in all_job_ids]
     filtered_jobs = [job for job in runtime_jobs if job.status in status]
 
     jobs = filtered_jobs[offset : offset + limit]
@@ -140,27 +141,32 @@ def get_jobs(
     return JobsResponse(jobs=jobs, count=count)
 
 
-@runtime.get("/jobs/{job_id}", response_model=JobResponse, tags=["jobs"])
+@runtime.get(
+    "/jobs/{job_id}", summary="Get a program job", response_model=JobResponse, tags=["jobs"]
+)
 def get_job(job_id: str):
+    """Get a program job"""
     job = queue.fetch_job(job_id)
     if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
-    return to_job_response(job)
+    return _to_job_response(job)
 
 
-@runtime.get("/jobs/{job_id}/logs", tags=["jobs"])
+@runtime.get("/jobs/{job_id}/logs", summary="List job logs", tags=["jobs"])
 def get_job_logs(job_id: str):
+    """List all job logs"""
     job = queue.fetch_job(job_id)
     if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
     with open(job.meta["log_path"], "r") as log_file:
         return log_file.read()
 
 
-@runtime.get("/jobs/{job_id}/results", tags=["jobs"])
+@runtime.get("/jobs/{job_id}/results", summary="List job results", tags=["jobs"])
 def get_job_results(job_id: str):
+    """List all job results"""
     job = queue.fetch_job(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -172,8 +178,11 @@ def get_job_results(job_id: str):
         return ""
 
 
-@runtime.delete("/jobs/{job_id}", status_code=204, tags=["jobs"])
+@runtime.delete(
+    "/jobs/{job_id}", summary="Deletes a job", status_code=status.HTTP_204_NO_CONTENT, tags=["jobs"]
+)
 def delete_job(job_id: str):
+    """Delete the specified job"""
     job = queue.fetch_job(job_id)
     if job:
         completed_job_ids = finished.get_job_ids() + failed.get_job_ids()
@@ -186,18 +195,37 @@ def delete_job(job_id: str):
     raise HTTPException(status_code=404, detail="Job not found")
 
 
-@runtime.post("/jobs/{job_id}/cancel", status_code=204, tags=["jobs"])
+@runtime.post(
+    "/jobs/{job_id}/cancel",
+    summary="Cancels the job execution",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["jobs"],
+)
 def cancel_job(job_id: str):
+    """
+    The real Qiskit Runtime can cancel the job execution but this is **not**
+    supported in the test server.
+    """
     raise HTTPException(
-        status_code=403, detail="Job not finalized. The test server cannot cancel jobs."
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Job not finalized. The test server cannot cancel jobs.",
     )
+
+
+@runtime.get("/stream/jobs/{job_id}", summary="Websocket: get the job result stream", tags=["jobs"])
+def stream_job_results_docs(_: str):
+    """
+    Get a job results stream as the job runs
+    """
+    pass
 
 
 @runtime.websocket("/stream/jobs/{job_id}")
 async def stream_job_results(job_id: str, websocket: WebSocket):
+    """Sends logs and results via websocket."""
     job = queue.fetch_job(job_id)
     if job is None:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
     await websocket.accept()
     redis_conn = redis_client.connection_pool.get_connection("_")
@@ -220,23 +248,35 @@ async def stream_job_results(job_id: str, websocket: WebSocket):
     await websocket.close()
 
 
-@runtime.get("/programs", response_model=ProgramsResponse, tags=["programs"])
+@runtime.get(
+    "/programs",
+    summary="List programs",
+    response_model=ProgramsResponse,
+    tags=["programs"],
+)
 def get_programs():
+    """List all of my programs"""
     all_program_modules = list(_PROGRAM_MAP.values())
-    all_metadata = [to_program_response(program_module) for program_module in all_program_modules]
+    all_metadata = [_to_program_response(program_module) for program_module in all_program_modules]
     return ProgramsResponse(programs=all_metadata)
 
 
-@runtime.get("/programs/{program_id}", response_model=ProgramResponse, tags=["programs"])
+@runtime.get(
+    "/programs/{program_id}",
+    summary="Show the info of a program",
+    response_model=ProgramResponse,
+    tags=["programs"],
+)
 def get_program(program_id: str):
+    """Show the info of the specified program."""
     module_path = _PROGRAM_MAP.get(program_id)
     if not program_id:
-        raise HTTPException(status_code=404, detail="Program not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Program not found")
 
-    return to_program_response(module_path)
+    return _to_program_response(module_path)
 
 
-def to_job_response(job):
+def _to_job_response(job):
     _, backend, kwargs = job.args
     return JobResponse(
         id=job.id,
@@ -251,16 +291,16 @@ def to_job_response(job):
     )
 
 
-def to_program_response(program_module_path):
+def _to_program_response(program_module_path):
     metadata = load_metadata(program_module_path)
     return ProgramResponse(**metadata)
 
 
-def pending_status():
+def _pending_status():
     return list(map(_STATUS_MAP.get, ["queued", "started"]))
 
 
-def finished_status():
+def _finished_status():
     return list(map(_STATUS_MAP.get, ["finished", "stopped", "failed"]))
 
 
