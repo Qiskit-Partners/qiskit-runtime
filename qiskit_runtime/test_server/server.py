@@ -107,6 +107,7 @@ def run_job(program_call: ProgramParams):
     job.meta["program_id"] = program_call.programId
     job.meta["log_path"] = get_job_log_path(job.id)
     job.meta["result_path"] = get_job_result_path(job.id)
+    job.meta["channel_id"] = get_job_channel_id(job.id)
     job.save_meta()
     queue.enqueue_job(job)
     return {"id": job.id}
@@ -193,17 +194,20 @@ def cancel_job(job_id: str):
 
 @runtime.websocket("/stream/jobs/{job_id}")
 async def stream_job_results(job_id: str, websocket: WebSocket):
+    job = queue.fetch_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
     await websocket.accept()
     pubsub = redis_conn.pubsub()
-    pubsub.subscribe(get_job_channel_id(job_id))
+    pubsub.subscribe(job.meta["channel_id"])
 
     while True:
         message = pubsub.get_message()
-        if message:
-            data = message["data"]
-            print("xxx", type(data))
-            if data:
-                await websocket.send_text(str(data))
+        if message and message["type"] == "message":
+            _is_result, message_text = _get_message(message)
+            # TODO: should we treat the message differently if it is a result?
+            await websocket.send_text(message_text)
         else:
             await asyncio.sleep(0.1)
 
@@ -250,3 +254,9 @@ def pending_status():
 
 def finished_status():
     return list(map(_STATUS_MAP.get, ["finished", "stopped", "failed"]))
+
+
+def _get_message(message):
+    redis_message = message["data"].decode("utf-8")
+    message_type, message_text = redis_message.split(":", 1)
+    return message_type == "result", message_text
