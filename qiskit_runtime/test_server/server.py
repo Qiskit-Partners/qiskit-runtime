@@ -16,14 +16,14 @@ from rq.registry import FinishedJobRegistry, StartedJobRegistry, FailedJobRegist
 import aioredis
 
 from qiskit.providers.ibmq.runtime import RuntimeDecoder
-from qiskit_runtime.test_server.ioutils import (
+from qiskit_runtime.test_server.jobids import (
     get_job_log_path,
     get_job_result_path,
     get_job_channel_id,
 )
 
 from .launcher import launch
-from .metadata import load_metadata
+from .metadata import all_programs, load_metadata, resolve_program_module_path
 
 _DEFAULT_SIMULATOR = "aer_simulator"
 _STATUS_MAP = {
@@ -33,13 +33,6 @@ _STATUS_MAP = {
     "stopped": "Cancelled",
     "failed": "Failed",
 }
-_PROGRAM_MAP = {
-    "circuit-runner": "qiskit_runtime.circuit_runner.circuit_runner",
-    "quantum-kernel-alignment": "qiskit_runtime.qka.qka",
-    "vqe": "qiskit_runtime.vqe.vqe_program",
-    "sample-program": "qiskit_runtime.sample_program.sample_program",
-}
-_DEFAULT_PROGRAM_TIMEOUT = 300
 
 redis_client = Redis()
 queue = Queue(connection=redis_client)
@@ -51,6 +44,8 @@ runtime = FastAPI()
 
 
 class ProgramParams(BaseModel):
+    """Configuration and input data for scheduling a program execution."""
+
     programId: str
     hub: str
     group: str
@@ -60,6 +55,8 @@ class ProgramParams(BaseModel):
 
 
 class JobResponse(BaseModel):
+    """Execution, configuration and input data of a program."""
+
     id: str
     hub: str
     group: str
@@ -72,11 +69,15 @@ class JobResponse(BaseModel):
 
 
 class JobsResponse(BaseModel):
+    """List of jobs."""
+
     jobs: List[JobResponse]
     count: int
 
 
 class ProgramResponse(BaseModel):
+    """Metadata of a program."""
+
     name: str
     cost: Optional[int] = 600
     description: str
@@ -88,24 +89,25 @@ class ProgramResponse(BaseModel):
 
 
 class ProgramsResponse(BaseModel):
+    """Metadata of all programs."""
+
     programs: List[ProgramResponse]
 
 
 @runtime.post("/jobs", summary="Run a program", tags=["jobs"])
 def run_job(program_call: ProgramParams):
     """Run a quantum program"""
-    program_module_path = _PROGRAM_MAP[program_call.programId]
-    metadata = load_metadata(program_module_path)
+    program_id = program_call.programId
+    metadata = load_metadata(program_id)
     kwargs = json.loads(program_call.params[0], cls=RuntimeDecoder) if program_call.params else {}
     job = Job.create(
         launch,
-        args=(program_module_path, _DEFAULT_SIMULATOR, kwargs),
+        args=(program_id, _DEFAULT_SIMULATOR, kwargs),
         result_ttl=-1,
         failure_ttl=-1,
-        timeout=metadata.get("max_execution_time", _DEFAULT_PROGRAM_TIMEOUT),
+        timeout=metadata["max_execution_time"],
         connection=redis_client,
     )
-    job.meta["program_id"] = program_call.programId
     job.meta["log_path"] = get_job_log_path(job.id)
     job.meta["result_path"] = get_job_result_path(job.id)
     job.meta["channel_id"] = get_job_channel_id(job.id)
@@ -126,14 +128,14 @@ def get_jobs(
     ),
 ):
     """List my quantum program jobs"""
-    status = _pending_status() if pending else _finished_status()
+    job_status = _pending_status() if pending else _finished_status()
     all_job_ids = (
         queue.get_job_ids() + started.get_job_ids()
         if pending
         else finished.get_job_ids() + failed.get_job_ids()
     )
     runtime_jobs = [_to_job_response(queue.fetch_job(job_id)) for job_id in all_job_ids]
-    filtered_jobs = [job for job in runtime_jobs if job.status in status]
+    filtered_jobs = [job for job in runtime_jobs if job.status in job_status]
 
     jobs = filtered_jobs[offset : offset + limit]
     count = len(jobs)
@@ -213,7 +215,7 @@ def cancel_job(job_id: str):
 
 
 @runtime.get("/stream/jobs/{job_id}", summary="Websocket: get the job result stream", tags=["jobs"])
-def stream_job_results_docs(_: str):
+def stream_job_results_docs(_):
     """
     Get a job results stream as the job runs
     """
@@ -256,8 +258,8 @@ async def stream_job_results(job_id: str, websocket: WebSocket):
 )
 def get_programs():
     """List all of my programs"""
-    all_program_modules = list(_PROGRAM_MAP.values())
-    all_metadata = [_to_program_response(program_module) for program_module in all_program_modules]
+    all_program_ids = all_programs()
+    all_metadata = [_to_program_response(program_id) for program_id in all_program_ids]
     return ProgramsResponse(programs=all_metadata)
 
 
@@ -269,15 +271,15 @@ def get_programs():
 )
 def get_program(program_id: str):
     """Show the info of the specified program."""
-    module_path = _PROGRAM_MAP.get(program_id)
-    if not program_id:
+    module_path = resolve_program_module_path(program_id)
+    if not module_path:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Program not found")
 
-    return _to_program_response(module_path)
+    return _to_program_response(program_id)
 
 
 def _to_job_response(job):
-    _, backend, kwargs = job.args
+    program_id, backend, kwargs = job.args
     return JobResponse(
         id=job.id,
         hub="test-hub",
@@ -286,13 +288,13 @@ def _to_job_response(job):
         backend=backend,
         status=_STATUS_MAP[job.get_status()],
         params=[json.dumps(kwargs)],
-        program=job.meta["program_id"],
+        program=program_id,
         created=job.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
     )
 
 
-def _to_program_response(program_module_path):
-    metadata = load_metadata(program_module_path)
+def _to_program_response(program_id):
+    metadata = load_metadata(program_id)
     return ProgramResponse(**metadata)
 
 

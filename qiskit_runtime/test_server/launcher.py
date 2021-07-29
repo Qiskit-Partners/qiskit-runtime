@@ -2,6 +2,7 @@
 
 import json
 import importlib
+from qiskit_runtime.test_server.metadata import resolve_program_module_path
 from typing import Any, Type
 from contextlib import ExitStack, redirect_stdout, redirect_stderr
 
@@ -73,12 +74,13 @@ class TestServerUserMessenger(UserMessenger):
             result_file.write(message)
 
 
-def launch(program_module_path, simulator_name, kwargs):
+def launch(program_id, simulator_name, kwargs):
     """Prepare and launch the Qiskit Runtime program."""
 
     with TestServerUserMessenger() as user_messenger:
         from qiskit import Aer
 
+        program_module_path = resolve_program_module_path(program_id)
         program_module = importlib.import_module(program_module_path)
         backend = Aer.get_backend(simulator_name)
 
