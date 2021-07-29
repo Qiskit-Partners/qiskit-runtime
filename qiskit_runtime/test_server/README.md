@@ -13,6 +13,46 @@ https://github.com/Qiskit-Partners/qiskit-runtime/blob/main/tutorials/API_direct
 Uploading programs to the test server is not supported via API, but it is
 possible to configure [new programs with minimal effort](#new-programs).
 
+## Quick setup
+
+The easiest way to run the test server is to build and run the Docker image
+in this repository. Thus, [install Docket](https://docs.docker.com/get-docker/)
+and run the following command to build the image:
+
+    docker build -t qiskitruntime:latest .
+
+And to run the Docker container:
+
+    docker run \
+      --rm -d --name qr-test-server \
+      --volume="$(pwd)"/qiskit_runtime:/qiskit-runtime/qiskit_runtime \
+      --volume="$(pwd)"/logs:/qiskit-runtime/logs \
+      -p 8000:8000 \
+      -e "NUM_WORKERS=4" \
+      qiskitruntime:latest \
+      bash start-test-server.sh
+
+The previous command mounts the `qiskit_runtime` and `logs` directories from the
+current repository to the container so any change you do in these directories
+will be reflected in the container.
+
+The previous configuration allows up to 4 programs to be run at the same time.
+If you want to change this number, you can use the `NUM_WORKERS` environment
+variable. For example, to run 8 programs simultaneously, you can use:
+
+    docker run \
+      --rm -d --name qr-test-server \
+      --volume="$(pwd)"/qiskit_runtime:/qiskit-runtime/qiskit_runtime \
+      --volume="$(pwd)"/logs:/qiskit-runtime/logs \
+      -p 8000:8000 \
+      -e "NUM_WORKERS=8" \
+      qiskitruntime:latest \
+      bash start-test-server.sh
+
+If you want to stop the container, you can run:
+
+    docker stop qr-test-server
+
 ## Installation
 
 The test server relies on Redis for the asynchrnous execution of programs. The
@@ -115,12 +155,12 @@ A quick way of testing it is to open a browser and use the developer tools:
 ## New programs
 
 Although you cannot use the API to upload programs, you can still expose your
-own programs trhough the test server. Let's see how:
+own programs through the test server. Let's see how:
 
 ### Prerequisites
 
 If you are thinking of creating your own programs, you may be interested in
-followinf the same conventions we use at Qiskit Runtime. You can install the
+following the same conventions we use at Qiskit Runtime. You can install the
 development dependencies with:
 
     pip install -r requirements-dev.txt
