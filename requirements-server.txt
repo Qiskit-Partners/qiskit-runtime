@@ -3,3 +3,4 @@ qiskit-aer
 fastapi
 rq
 uvicorn
+aioredis==2.0.0b1

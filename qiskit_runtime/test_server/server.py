@@ -14,13 +14,14 @@ from redis import Redis
 from rq import Queue
 from rq.job import Job
 from rq.registry import FinishedJobRegistry, StartedJobRegistry, FailedJobRegistry
+import aioredis
+
 from qiskit.providers.ibmq.runtime import RuntimeDecoder
 from qiskit_runtime.test_server.ioutils import (
     get_job_log_path,
     get_job_result_path,
     get_job_channel_id,
 )
-
 
 from .launcher import launch
 from .metadata import load_metadata
@@ -41,8 +42,8 @@ _PROGRAM_MAP = {
 }
 _DEFAULT_PROGRAM_TIMEOUT = 300
 
-redis_conn = Redis()
-queue = Queue(connection=redis_conn)
+redis_client = Redis()
+queue = Queue(connection=redis_client)
 finished = FinishedJobRegistry(queue=queue)
 started = StartedJobRegistry(queue=queue)
 failed = FailedJobRegistry(queue=queue)
@@ -102,7 +103,7 @@ def run_job(program_call: ProgramParams):
         result_ttl=-1,
         failure_ttl=-1,
         timeout=metadata.get("max_execution_time", _DEFAULT_PROGRAM_TIMEOUT),
-        connection=redis_conn,
+        connection=redis_client,
     )
     job.meta["program_id"] = program_call.programId
     job.meta["log_path"] = get_job_log_path(job.id)
@@ -199,17 +200,24 @@ async def stream_job_results(job_id: str, websocket: WebSocket):
         raise HTTPException(status_code=404, detail="Job not found")
 
     await websocket.accept()
-    pubsub = redis_conn.pubsub()
-    pubsub.subscribe(job.meta["channel_id"])
+    redis_conn = redis_client.connection_pool.get_connection("_")
+    async_client = aioredis.Redis(host=redis_conn.host, port=redis_conn.port, db=redis_conn.db)
 
-    while True:
-        message = pubsub.get_message()
-        if message and message["type"] == "message":
-            _is_result, message_text = _get_message(message)
-            # TODO: should we treat the message differently if it is a result?
-            await websocket.send_text(message_text)
-        else:
-            await asyncio.sleep(0.1)
+    async with async_client.pubsub() as pubsub:
+        channel_id = job.meta["channel_id"]
+        await pubsub.subscribe(channel_id)
+
+        is_result = False
+        while not is_result:
+            message = await pubsub.get_message()
+            if message and message["type"] == "message":
+                is_result, message_text = _parse_message(message)
+                # TODO: should we treat the message differently if it is a result?
+                await websocket.send_text(message_text)
+
+        await pubsub.unsubscribe(channel_id)
+
+    await websocket.close()
 
 
 @runtime.get("/programs", response_model=ProgramsResponse, tags=["programs"])
@@ -256,7 +264,7 @@ def finished_status():
     return list(map(_STATUS_MAP.get, ["finished", "stopped", "failed"]))
 
 
-def _get_message(message):
+def _parse_message(message):
     redis_message = message["data"].decode("utf-8")
     message_type, message_text = redis_message.split(":", 1)
     return message_type == "result", message_text
