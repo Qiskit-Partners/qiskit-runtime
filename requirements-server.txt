@@ -2,5 +2,5 @@ cvxopt
 qiskit-aer
 fastapi
 rq
-uvicorn
+uvicorn[standard]
 aioredis==2.0.0b1
