@@ -1,11 +1,14 @@
 # Qiskit Runtime Test Server
 
-The test server exposes the Qiskit Runtime API locally. It is intended for use
-in testing and development and uses Qiskit Aer simulators instead of real
-devices.
+The test server exposes the Qiskit Runtime API locally. It is intended for
+developing and testing cloud services relying on quantum computations. The test
+server uses Qiskit Aer simulators instead of real devices.
 
 The test server API mimicks the real Qiskit Runtime API found at:
 https://runtime-us-east.quantum-computing.ibm.com/openapi/#/
+
+A tutorial on how to access the REST API directly can be found at:
+https://github.com/Qiskit-Partners/qiskit-runtime/blob/main/tutorials/API_direct.ipynb
 
 Uploading programs to the test server is not supported via API, but it is
 possible to configure [new programs with minimal effort](#new-programs).
@@ -166,8 +169,9 @@ The `main` function is always passed the `backend` and `messenger` positional
 arguments and whatever named parameters you specify at the moment of scheduling
 a new job.
 
-Read more about writing your own entry points in the
-[Qiskit Runtime documentation](#).
+Learn more about writing your own programs by reading the
+"Constructing a runtime program" section at the
+["Uploading a Qiskit runtime program" tutorial](https://github.com/Qiskit-Partners/qiskit-runtime/blob/main/tutorials/02_uploading_program.ipynb).
 
 ### Complete the mandatory metadata
 
@@ -180,7 +184,9 @@ Open `hello_quantum.json` and add the following content:
 }
 ```
 
-Read more about writing your own metadata in the [Qiskit Runtime documentation](#).
+Learn more about writing filling-in the program metadata by reading the
+"Defining program metadata" section at the
+["Uploading a Qiskit runtime program" tutorial](https://github.com/Qiskit-Partners/qiskit-runtime/blob/main/tutorials/02_uploading_program.ipynb).
 
 ### Register and expose your program
 
