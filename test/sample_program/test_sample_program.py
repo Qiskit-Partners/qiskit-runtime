@@ -11,24 +11,29 @@
 # that they have been altered from the originals.
 
 """Test the sample_program."""
-import sys, os
-sys.path.insert(0, os.path.join(os.getcwd(), "../../qiskit_runtime"))
 
 from qiskit_runtime.sample_program import sample_program
-from qiskit import Aer
+from qiskit.providers.aer import AerSimulator
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder, RuntimeDecoder
-from qiskit.providers.ibmq.runtime import UserMessenger
+from test.fake_user_messenger import FakeUserMessenger
 from unittest import TestCase
 import json
+
 class TestSampleProgram(TestCase):
     """Test sample_program."""
-    def test_run_program(self):
+
+    def setUp(self) -> None:
+        """Test case setup."""
+        self.backend = AerSimulator()
+        user_messenger = FakeUserMessenger()
+        self.user_messenger = user_messenger
+
+    def test_sample_program(self):
         """Test sample program."""
         input = {
             "iterations": 2
         }
-        backend = Aer.get_backend('aer_simulator')
-        user_messenger = UserMessenger()
         serialized_inputs = json.dumps(input, cls=RuntimeEncoder)
         unserialized_inputs = json.loads(serialized_inputs, cls=RuntimeDecoder)
-        sample_program.main(backend, user_messenger, **unserialized_inputs)
+        sample_program.main(self.backend, self.user_messenger, **unserialized_inputs)
+        self.assertEqual(self.user_messenger.call_count, input["iterations"] + 1)
