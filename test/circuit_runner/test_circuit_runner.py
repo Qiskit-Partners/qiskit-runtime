@@ -51,4 +51,3 @@ class TestCircuitRunner(TestCase):
             measurement_error_mitigation=False, **unserialized_inputs)
         self.assertEqual(self.user_messenger.call_count, 1)
         self.assertTrue(isinstance(Result.from_dict(self.user_messenger.message), Result))
-
