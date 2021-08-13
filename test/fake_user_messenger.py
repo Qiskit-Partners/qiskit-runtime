@@ -17,10 +17,12 @@ from typing import Any, Type
 class FakeUserMessenger(object):
     def __init__(self):
         self.call_count = 0
+        self.message = None
 
     def publish(self, message: Any, \
         encoder: Type[json.JSONEncoder] = RuntimeEncoder, \
         final: bool = False
         ):
+        self.message = message
         self.call_count += 1
         
