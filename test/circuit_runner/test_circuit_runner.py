@@ -16,9 +16,13 @@
 # sys.path.insert(0, os.path.join(os.getcwd(), "../../qiskit_runtime"))
 
 from qiskit.providers.aer import AerSimulator
+from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder, RuntimeDecoder
 from qiskit_runtime.circuit_runner import circuit_runner
+from qiskit.result.result import Result
 from qiskit import QuantumCircuit
 from test.fake_user_messenger import FakeUserMessenger
+
+import json
 from unittest import TestCase
 
 class TestCircuitRunner(TestCase):
@@ -36,8 +40,15 @@ class TestCircuitRunner(TestCase):
         
     def test_circuit_runner(self):
         """Test circuit_runner program."""
+        input = {
+            "metadata": "foo"
+        }
+        serialized_inputs = json.dumps(input, cls=RuntimeEncoder)
+        unserialized_inputs = json.loads(serialized_inputs, cls=RuntimeDecoder)
         circuit_runner.main(backend=self.backend, user_messenger=self.user_messenger, \
             circuits=self.qc, optimization_level=0, \
             initial_layout=[0,1,4,7,10,12], \
-            measurement_error_mitigation=False)
+            measurement_error_mitigation=False, **unserialized_inputs)
         self.assertEqual(self.user_messenger.call_count, 1)
+        self.assertTrue(isinstance(Result.from_dict(self.user_messenger.message), Result))
+
