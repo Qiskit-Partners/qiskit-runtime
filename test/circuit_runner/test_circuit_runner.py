@@ -12,42 +12,43 @@
 
 """Test the circuit runner program."""
 
-# import sys, os
-# sys.path.insert(0, os.path.join(os.getcwd(), "../../qiskit_runtime"))
+import json
+from test.fake_user_messenger import FakeUserMessenger
+from unittest import TestCase
 
 from qiskit.providers.aer import AerSimulator
 from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder, RuntimeDecoder
-from qiskit_runtime.circuit_runner import circuit_runner
 from qiskit.result.result import Result
 from qiskit import QuantumCircuit
-from test.fake_user_messenger import FakeUserMessenger
+from qiskit_runtime.circuit_runner import circuit_runner
 
-import json
-from unittest import TestCase
 
 class TestCircuitRunner(TestCase):
     """Test circuit_runner."""
 
     def setUp(self) -> None:
         """Test case setup."""
-        N = 6
-        qc = QuantumCircuit(N)
-        qc.x(range(0, N))
-        qc.h(range(0, N))
+        n = 6
+        qc = QuantumCircuit(n)
+        qc.x(range(0, n))
+        qc.h(range(0, n))
         self.qc = qc
         self.backend = AerSimulator()
         self.user_messenger = FakeUserMessenger()
-        
+
     def test_circuit_runner(self):
         """Test circuit_runner program."""
-        input = {
-            "metadata": "foo"
-        }
-        serialized_inputs = json.dumps(input, cls=RuntimeEncoder)
+        serialized_inputs = json.dumps(
+            [self.qc, 0, [0, 1, 4, 7, 10, 12], False], cls=RuntimeEncoder
+        )
         unserialized_inputs = json.loads(serialized_inputs, cls=RuntimeDecoder)
-        circuit_runner.main(backend=self.backend, user_messenger=self.user_messenger, \
-            circuits=self.qc, optimization_level=0, \
-            initial_layout=[0,1,4,7,10,12], \
-            measurement_error_mitigation=False, **unserialized_inputs)
+        circuit_runner.main(
+            backend=self.backend,
+            user_messenger=self.user_messenger,
+            circuits=unserialized_inputs[0],
+            optimization_level=unserialized_inputs[1],
+            initial_layout=unserialized_inputs[2],
+            measurement_error_mitigation=unserialized_inputs[3],
+        )
         self.assertEqual(self.user_messenger.call_count, 1)
         self.assertTrue(isinstance(Result.from_dict(self.user_messenger.message), Result))

@@ -12,12 +12,13 @@
 
 """Test the sample_program."""
 
-from qiskit_runtime.sample_program import sample_program
-from qiskit.providers.aer import AerSimulator
-from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder, RuntimeDecoder
+import json
 from test.fake_user_messenger import FakeUserMessenger
 from unittest import TestCase
-import json
+from qiskit.providers.aer import AerSimulator
+from qiskit.providers.ibmq.runtime.utils import RuntimeEncoder, RuntimeDecoder
+from qiskit_runtime.sample_program import sample_program
+
 
 class TestSampleProgram(TestCase):
     """Test sample_program."""
@@ -30,10 +31,8 @@ class TestSampleProgram(TestCase):
 
     def test_sample_program(self):
         """Test sample program."""
-        input = {
-            "iterations": 2
-        }
-        serialized_inputs = json.dumps(input, cls=RuntimeEncoder)
+        inputs = {"iterations": 2}
+        serialized_inputs = json.dumps(inputs, cls=RuntimeEncoder)
         unserialized_inputs = json.loads(serialized_inputs, cls=RuntimeDecoder)
         sample_program.main(self.backend, self.user_messenger, **unserialized_inputs)
-        self.assertEqual(self.user_messenger.call_count, input["iterations"] + 1)
+        self.assertEqual(self.user_messenger.call_count, inputs["iterations"] + 1)
