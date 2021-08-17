@@ -38,17 +38,16 @@ class TestCircuitRunner(TestCase):
 
     def test_circuit_runner(self):
         """Test circuit_runner program."""
-        serialized_inputs = json.dumps(
-            [self.qc, 0, [0, 1, 4, 7, 10, 12], False], cls=RuntimeEncoder
-        )
+        inputs = {
+            "circuits": self.qc,
+            "optimization_level": 0,
+            "initial_layout": [0, 1, 4, 7, 10, 12],
+            "measurement_error_mitigation": False,
+        }
+        serialized_inputs = json.dumps(inputs, cls=RuntimeEncoder)
         unserialized_inputs = json.loads(serialized_inputs, cls=RuntimeDecoder)
         circuit_runner.main(
-            backend=self.backend,
-            user_messenger=self.user_messenger,
-            circuits=unserialized_inputs[0],
-            optimization_level=unserialized_inputs[1],
-            initial_layout=unserialized_inputs[2],
-            measurement_error_mitigation=unserialized_inputs[3],
+            backend=self.backend, user_messenger=self.user_messenger, **unserialized_inputs
         )
         self.assertEqual(self.user_messenger.call_count, 1)
         self.assertTrue(isinstance(Result.from_dict(self.user_messenger.message), Result))
