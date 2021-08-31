@@ -65,4 +65,4 @@ def main(
         # Performs measurement error mitigation.
         pass
 
-    user_messenger.publish(result.to_dict(), final=True)
+    return result.to_dict()

@@ -46,4 +46,4 @@ def main(backend, user_messenger, **kwargs):
         result = backend.run(qc).result()
         user_messenger.publish({"iteration": it, "counts": result.get_counts()})
 
-    user_messenger.publish("All done!", final=True)
+    return "All done!"
