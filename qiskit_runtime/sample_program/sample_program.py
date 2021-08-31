@@ -39,6 +39,9 @@ def main(backend, user_messenger, **kwargs):
         user_messenger (qiskit.providers.ibmq.runtime.UserMessenger): Used to communicate with the
             program consumer.
         kwargs: User inputs.
+
+    Returns:
+        any: Final result of the program.
     """
     iterations = kwargs.pop("iterations", 5)
     for it in range(iterations):
