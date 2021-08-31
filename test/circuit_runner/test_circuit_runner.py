@@ -49,5 +49,5 @@ class TestCircuitRunner(TestCase):
         circuit_runner.main(
             backend=self.backend, user_messenger=self.user_messenger, **unserialized_inputs
         )
-        self.assertEqual(self.user_messenger.call_count, 1)
+        self.assertEqual(self.user_messenger.call_count, 0)
         self.assertTrue(isinstance(Result.from_dict(self.user_messenger.message), Result))
