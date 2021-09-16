@@ -17,7 +17,7 @@ authorized users can then invoke these quantum programs by simply passing in the
 
 ---
 
-:rocket: Qiskit Runtime is now available on all IBM Quantum systems and simulators. Open-access users
+:rocket: Qiskit Runtime is now available on all IBM Quantum systems. Open-access users
 can only execute runtime programs on `ibmq_qasm_simulator`, but premium users can execute them on
 any systems to which they have access. You are an open-access user if `ibm-q/open/main` is your 
 _only_ provider.
