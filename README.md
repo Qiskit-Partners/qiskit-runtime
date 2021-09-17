@@ -134,7 +134,7 @@ job = provider.runtime.run(program_id="sample-program",
                            inputs=program_inputs,
                            callback=interim_result_callback
                           )
-print(f"job ID: {job.job_id()}")
+print(f"job ID: {job.job_id}")
 result = job.result()
 ```
 
