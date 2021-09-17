@@ -10,7 +10,7 @@ Using Qiskit Runtime, for example, a research team at IBM Quantum was able to ac
 up in their lithium hydride simulation. For more information, see the 
 [IBM Research blog](https://research.ibm.com/blog/120x-quantum-speedup) 
 
-Qiskit Runtime allows premium users to upload their Qiskit quantum programs for themselves or 
+Qiskit Runtime allows authorized users to upload their Qiskit quantum programs for themselves or 
 others to use. A Qiskit quantum program, also called a Qiskit runtime program, is a piece of Python code that takes certain inputs, performs
 quantum and maybe classical computation, and returns the processing results. The same or other
 authorized users can then invoke these quantum programs by simply passing in the required input parameters.
@@ -19,8 +19,9 @@ authorized users can then invoke these quantum programs by simply passing in the
 
 :rocket: Qiskit Runtime is now available on all IBM Quantum systems. Open-access users
 can only execute runtime programs on `ibmq_qasm_simulator`, but premium users can execute them on
-any systems to which they have access. You are an open-access user if `ibm-q/open/main` is your 
-_only_ provider and you are a premium user if you have access to more than one provider.
+any systems to which they have access. Premium users are also allowed to upload Qiskit Runtime programs.
+You are an open-access user if `ibm-q/open/main` is your _only_ provider, and you are a premium user
+if you have access to more than one provider.
 
 ---
 
