@@ -1,2 +1,2 @@
-Files in this directory may provide additional information about Qiskit Runtime. However, they are
-only maintained with best effort.
+Files in this directory provide additional information about Qiskit Runtime but may not be updated
+regularly.
