@@ -4,7 +4,7 @@
 Runtime limitations
 ===================
 
-- **Open users can only execute runtime programs on simulators.**
+- **Open-access users can only execute runtime programs on simulators.**
    
    At present, open-access users can only execute runtime programs on
    simulators and cannot upload custom programs.
