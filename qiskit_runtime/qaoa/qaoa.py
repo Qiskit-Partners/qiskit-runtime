@@ -1921,6 +1921,11 @@ class SwapStrategyCreator(AnalysisPass):
 
         coupling_map = backend.configuration().coupling_map
 
+        if coupling_map is None:
+            raise QiskitError(
+                "Cannot create a swap strategy if the backend does not have a coupling map."
+            )
+
         self._coupling_map = CouplingMap(coupling_map)
         self._two_qubit_fidelity = {}
         self._max_problem_size = backend.configuration().num_qubits
@@ -2312,8 +2317,6 @@ def swap_pass_manager_creator(
             implement.
     """
 
-    coupling_map = CouplingMap(backend.configuration().coupling_map)
-
     if swap_strategy is not None and swap_strategy_qubits is None:
         warn("swap_strategy will be ignored since swap_strategy_qubits is None.")
 
@@ -2330,6 +2333,8 @@ def swap_pass_manager_creator(
 
     if use_initial_mapping:
         swap_pm.append(InitialQubitMapper())
+
+    coupling_map = CouplingMap(backend.configuration().coupling_map)
 
     swap_pm.append(
         [
@@ -2384,12 +2389,29 @@ def main(backend, user_messenger, **kwargs):
     # Extract the input form the kwargs and build serializable kwargs for book keeping.
     serialized_inputs = {}
     operator = kwargs["operator"]
+
+    if not isinstance(operator, PauliSumOp):
+        try:
+            operator = PauliSumOp.from_list([(str(operator), 1)])
+        except QiskitError as err:
+            raise QiskitError(
+                f"Cannot convert {operator} of type {type(operator)} to a PauliSumOp."
+            ) from err
+
     serialized_inputs["operator"] = operator.primitive.to_list()
 
     aux_operators = kwargs.get("aux_operators", None)
     if aux_operators is not None:
         serialized_inputs["aux_operators"] = []
         for op in aux_operators:
+            if not isinstance(op, PauliSumOp):
+                try:
+                    op = PauliSumOp.from_list([(str(op), 1)])
+                except QiskitError as err:
+                    raise QiskitError(
+                        f"Cannot convert {op} of type {type(op)} to a PauliSumOp"
+                    ) from err
+
             serialized_inputs["aux_operators"].append(op.primitive.to_list())
 
     initial_point = kwargs.get("initial_point", None)
@@ -2503,4 +2525,4 @@ def main(backend, user_messenger, **kwargs):
         "inputs": serialized_inputs,
     }
 
-    user_messenger.publish(serialized_result, final=True)
+    return serialized_result
