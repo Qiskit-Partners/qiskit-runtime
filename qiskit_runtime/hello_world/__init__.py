@@ -10,4 +10,4 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Package containing ``sample-program`` Qiskit quantum program."""
+"""Package containing ``hello-world`` Qiskit quantum program."""
