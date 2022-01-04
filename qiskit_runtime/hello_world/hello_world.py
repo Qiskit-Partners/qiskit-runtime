@@ -10,7 +10,9 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""A sample runtime program that submits random circuits for user-specified iterations."""
+"""A sample runtime program called hello-world that submits random circuits
+for user-specified iterations.
+"""
 
 import random
 from typing import Any
