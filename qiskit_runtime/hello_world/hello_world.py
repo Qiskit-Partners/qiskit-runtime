@@ -46,7 +46,7 @@ def main(backend, user_messenger, **kwargs) -> Any:
     Returns:
         Final result of the program.
     """
-    iterations = kwargs.pop("iterations", 5)
+    iterations = kwargs.pop("iterations", 1)
     for it in range(iterations):
         qc = prepare_circuits(backend)
         result = backend.run(qc).result()
