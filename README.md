@@ -1,4 +1,4 @@
-# Qiskit Runtime
+# Qiskit Runtime (NOW ARCHIVED)
 [![License](https://img.shields.io/github/license/Qiskit/qiskit-terra.svg?style=popout-square)](https://opensource.org/licenses/Apache-2.0)
 
 > **Archived**: This repository has been merged with [qiskit-ibm-runtime](https://github.com/qiskit/qiskit-ibm-runtime) to keep documentation closer to code. This repository is archived and no longer maintained. Please use [qiskit-ibm-runtime](https://github.com/qiskit/qiskit-ibm-runtime) instead.
