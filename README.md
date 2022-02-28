@@ -1,7 +1,7 @@
 # Qiskit Runtime
 [![License](https://img.shields.io/github/license/Qiskit/qiskit-terra.svg?style=popout-square)](https://opensource.org/licenses/Apache-2.0)
 
-> **Warning**: This repository was only temporarily used and never published. It is archived and no longer maintained. Please use https://github.com/qiskit/qiskit-ibm-runtime instead.
+> **Archived**: This repository has been merged with [qiskit-ibm-runtime](https://github.com/qiskit/qiskit-ibm-runtime) to keep documentation closer to code. This repository is archived and no longer maintained. Please use [qiskit-ibm-runtime](https://github.com/qiskit/qiskit-ibm-runtime) instead.
 
 
 **Qiskit Runtime** is a new architecture offered by IBM Quantum that streamlines quantum computations.
