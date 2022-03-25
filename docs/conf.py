@@ -70,6 +70,7 @@ extensions = [
     'sphinx.ext.extlinks',
     'nbsphinx',
     'jupyter_sphinx',
+    'sphinx_reredirects',
 ]
 html_static_path = ['_static']
 templates_path = ['_templates']
@@ -139,6 +140,12 @@ html_theme_options = {
     'prev_next_buttons_location': 'bottom',
     'style_external_links': True,
 }
+
+redirects = {
+    "*": "https://qiskit.org/documentation/partners/qiskit_ibm_runtime/index.html"
+
+}
+
 
 def load_tutorials(app):
     dest_dir = os.path.join(app.srcdir, 'tutorials')

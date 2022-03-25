@@ -4,3 +4,4 @@ jupyter-sphinx
 qiskit-sphinx-theme>=1.8.0
 sphinx-panels
 nbsphinx
+sphinx-reredirects
